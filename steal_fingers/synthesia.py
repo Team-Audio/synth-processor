@@ -1,4 +1,7 @@
+import sys
 import xml.etree.ElementTree as ET
+
+from tqdm import tqdm
 
 from pstep_base import PipelineStepBase
 
@@ -6,7 +9,7 @@ from pstep_base import PipelineStepBase
 class SynthesiaMetaDataParser(PipelineStepBase):
 
     def __init__(self, filename: str):
-
+        print("Ingesting synthesia metadata", file=sys.stderr)
         with open(filename) as file:
             tree = ET.parse(file)
             root = tree.getroot()
@@ -19,7 +22,7 @@ class SynthesiaMetaDataParser(PipelineStepBase):
 
         def parse_string_inline(v):
             arr = []
-            for cha in v:
+            for cha in tqdm(v):
                 cha = int(cha)
                 if cha > 5:
                     cha -= 5

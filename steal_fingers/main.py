@@ -5,25 +5,22 @@ from pstep_base import SymmetryAdapter
 from synth import Synth
 from synthesia import SynthesiaMetaDataParser
 from accord_grouper import GroupAccords
+import argh
 
 
-def main():
-    driver = Pipeline([
-        [
-            MidiParser('../Silent Night (Easy).mid'),
-            SynthesiaMetaDataParser('../Silent Night (Easy).synthesia')
-        ],
-        [
-            SymmetryAdapter(GroupAccords(), GroupAccords())
-        ],
-        [
-            SymmetryAdapter(Synth('left\\out'), Synth('right\\out')),
-            SymmetryAdapter(Labeler('left\\out'), Labeler('right\\out'))
-        ]
-    ])
+def main(midi_file, synthesia_file, output_left='left', output_right='right'):
+    driver = Pipeline([[
+        MidiParser(midi_file),
+        SynthesiaMetaDataParser(synthesia_file)
+    ], [
+        SymmetryAdapter(GroupAccords(), GroupAccords())
+    ], [
+        SymmetryAdapter(Synth(f'{output_left}\\out'), Synth(f'{output_right}\\out')),
+        SymmetryAdapter(Labeler(f'{output_left}\\out'), Labeler(f'{output_right}\\out'))
+    ]])
 
-    driver.run()
+    print(driver.run())
 
 
 if __name__ == '__main__':
-    main()
+    argh.dispatch_command(main)

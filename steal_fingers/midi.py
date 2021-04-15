@@ -1,3 +1,5 @@
+import sys
+
 import mido
 
 from pstep_base import PipelineStepBase
@@ -5,6 +7,7 @@ from pstep_base import PipelineStepBase
 
 class MidiParser(PipelineStepBase):
     def __init__(self, filename: str):
+        print("Ingesting midi", file=sys.stderr)
         midi = mido.MidiFile(filename)
 
         def do_i_want_this(x: mido.Message):

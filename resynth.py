@@ -1,47 +1,26 @@
-import sys
-import xml.etree.ElementTree as ET
+from labeler import Labeler
+from midi import MidiParser
+from pipeline import Pipeline
+from pstep_base import SymmetryAdapter
+from synth import Synth
+from synthesia import SynthesiaMetaDataParser
+from accord_grouper import GroupAccords
+import argh
 
-from tqdm import tqdm
 
-from pstep_base import PipelineStepBase
+def main(midi_file, synthesia_file, output_left='left', output_right='right'):
+    driver = Pipeline([[
+        MidiParser(midi_file),
+        SynthesiaMetaDataParser(synthesia_file)
+    ], [
+        SymmetryAdapter(GroupAccords(), GroupAccords())
+    ], [
+        SymmetryAdapter(Synth(f'{output_left}\\out'), Synth(f'{output_right}\\out')),
+        SymmetryAdapter(Labeler(f'{output_left}\\out'), Labeler(f'{output_right}\\out'))
+    ]])
+
+    print(driver.run())
 
 
-class SynthesiaMetaDataParser(PipelineStepBase):
-
-    def __init__(self, filename: str):
-        print("Ingesting synthesia metadata", file=sys.stderr)
-        with open(filename) as file:
-            tree = ET.parse(file)
-            root = tree.getroot()
-            for item in root.findall('./Songs'):
-                for child in item:
-                    fingerhints = child.attrib['FingerHints']
-                    right, left = fingerhints.split(' t1: ')
-                    self.right = right
-                    self.left = left
-
-        def parse_string_inline(v):
-            arr = []
-            for cha in tqdm(v):
-                cha = int(cha)
-                if cha > 5:
-                    cha -= 5
-                elif cha == 0:
-                    cha = 5
-                arr += [cha]
-            return arr
-
-        self.right = parse_string_inline(self.right)
-        self.left = parse_string_inline(self.left)
-
-    def has_left(self) -> bool:
-        return len(self.left) > 0
-
-    def has_right(self) -> bool:
-        return len(self.right) > 0
-
-    def pop_left(self):
-        return self.left.pop(0)
-
-    def pop_right(self):
-        return self.right.pop(0)
+if __name__ == '__main__':
+    argh.dispatch_command(main)

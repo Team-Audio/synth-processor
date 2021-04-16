@@ -7,6 +7,9 @@ from synthesia import SynthesiaMetaDataParser
 from accord_grouper import GroupAccords
 import argh
 
+@argh.arg('--output_left','-l')
+@argh.arg('--output_right','-r')
+@argh.arg('--soundfont','-f')
 
 def main(midi_file, synthesia_file, output_left='left', output_right='right',soundfont=r'C:\soundfonts\default.sf2'):
     driver = Pipeline([[

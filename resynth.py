@@ -8,14 +8,14 @@ from accord_grouper import GroupAccords
 import argh
 
 
-def main(midi_file, synthesia_file, output_left='left', output_right='right'):
+def main(midi_file, synthesia_file, output_left='left', output_right='right',soundfont=r'C:\soundfonts\default.sf2'):
     driver = Pipeline([[
         MidiParser(midi_file),
         SynthesiaMetaDataParser(synthesia_file)
     ], [
         SymmetryAdapter(GroupAccords(), GroupAccords())
     ], [
-        SymmetryAdapter(Synth(f'{output_left}\\out'), Synth(f'{output_right}\\out')),
+        SymmetryAdapter(Synth(f'{output_left}\\out',soundfont), Synth(f'{output_right}\\out',soundfont)),
         SymmetryAdapter(Labeler(f'{output_left}\\out'), Labeler(f'{output_right}\\out'))
     ]])
 
